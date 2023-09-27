@@ -9,6 +9,12 @@ ctk.set_default_color_theme("blue")
 
 cnx = None
 
+fonts = {
+    'default': ctk.Font(family="Arial", size=12),
+    'title': ctk.Font(family="Arial", size=22),
+    'subtitle': ctk.Font(family="Arial", size=16)
+}
+
 def createConnection():
     config = {
         'user': 'root',
@@ -29,7 +35,9 @@ class Window(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("MariaDB  -  127.0.0.1:3306")
-        self.geometry("800x600", )
+        self.geometry("800x600")
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
         self.db = None
 
     def loadDB_screen(self, cnx):
@@ -46,8 +54,11 @@ class Window(ctk.CTk):
         return cnx
 
     def main_screen(self):
-        self.label = ctk.CTkLabel(master=self, text=f"Banco de Dados: {self.db}", text_font=("Arial", 20))
+        self.top_left_frame = ctk.CTkFrame(master=self, width=700, height=200, corner_radius=12)
+        self.top_left_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nswe") # !
         
+        self.label = ctk.CTkLabel(master=self.top_left_frame, text=f"Banco de Dados: {self.db}")
+        self.label.grid(row=0, column=0, padx=10, pady=10)
 
     def mainloop(self, *args, **kwargs):
         return super().mainloop(*args, **kwargs)
@@ -64,7 +75,6 @@ if cnx != None:
     print(cnx)
     print("Conexão realizada com sucesso!")
     app.main_screen()
-
 
 app.mainloop()
 cnx.close()
