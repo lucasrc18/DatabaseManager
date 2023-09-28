@@ -1,0 +1,112 @@
+import mysql.connector as mysql
+import customtkinter as ctk
+from os import system
+
+
+# system("cls || clear")
+
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("blue") 
+
+cnx = None
+
+# fonts = {
+#     'default': ctk.Font(family="Arial", size=12),
+#     'title': ctk.Font(family="Arial", size=22),
+#     'subtitle': ctk.Font(family="Arial", size=16)
+# }
+
+class DBConnectWindow(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+        
+        self.geometry("200x300")
+        self.entry = ctk.CTkEntry(master=self, placeholder_text="Digite o nome do banco de dados: ")
+        self.entry.pack(padx=10, pady=10)
+    
+    def mainloop(self, *args, **kwargs):
+        return super().mainloop(*args, **kwargs)
+# t = DBConnectWindow()
+# t.mainloop()
+
+_config = None
+
+async def createConnection():
+    global _config
+    cnx = None
+    
+    try:
+        with await open("cnx.dbm", "r") as cnx_file:
+            
+            _config = {
+                'user': cnx_file.readline().split(":")[1],
+                'host': cnx_file.readline().split(":")[1],
+                'port': cnx_file.readline().split(":")[1],
+                'password': cnx_file.readline().split(":")[1],
+            }
+    except FileNotFoundError:
+        _config = {
+            'user': 'usr',
+            'host': '127.0.0.1',
+            'port': '3306',
+            'password': '',
+        }
+
+    try:
+        cnx = mysql.connect(**_config)
+    except mysql.Error as error:
+        print("Erro ao tentar conectar com o banco de dados!")
+        
+        print(f"\n\nCódigo do erro: \n{error.errno}")
+        print(error)
+        quit()
+
+    with open("cnx.dbm", "w") as file:   
+        file.writelines(
+            [f"{key}: {value}" for key, value in config.items()]
+        )
+    
+    return await cnx
+
+class Window(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+        self.geometry("800x600")
+        self.grid_columnconfigure(0, weight=0)
+        self.grid_rowconfigure(0, weight=1)
+        self.db = None
+
+    def main_screen(self):
+        self.top_left_frame = ctk.CTkFrame(master=self, width=700, height=200, corner_radius=12)
+        self.top_left_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nswe") # !
+        
+        self.label = ctk.CTkLabel(master=self.top_left_frame, text=f"Banco de Dados: {self.db}")
+        self.label.grid(row=0, column=0, padx=10, pady=10)
+
+    def mainloop(self, *args, **kwargs):
+        return super().mainloop(*args, **kwargs)
+
+def useDatabase(cnx, db):
+    cur = cnx.cursor()
+    cur.execute(f'CREATE DATABASE IF NOT EXISTS {db};')
+    cur.execute(f'USE {db}')
+    return cnx
+
+def config(app, cnx):    
+    app.title(f"MySQL - {_config['user']}@{_config['host']}:{_config['port']} - [{cnx.database}]")
+
+async def loadDB(cnx):
+        diag = ctk.CTkInputDialog(text="Digite o nome do banco de dados: ", title="Conectar ao Banco de Dados")
+        db = await diag.get_input()
+        
+        if db == None:
+            ctk.messagebox.showinfo("Fim de execução", "Fim de execução do programa, nenhum banco de dados foi especificado.")
+            quit()
+    
+        return useDatabase(cnx, db)
+
+cnx = loadDB(cnx=createConnection())
+app = Window()
+config(app=app, cnx=cnx)
+app.mainloop()
+cnx.close()
