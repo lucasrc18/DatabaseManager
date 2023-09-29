@@ -4,9 +4,9 @@ import mysql.connector as mysql
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
-class DBConnectWindow(ctk.CTk):
-    def __init__(self, handler):
-        super().__init__()
+class DBConnectWindow(ctk.CTkToplevel):
+    def __init__(self, handler, *args, **kwargs):
+        super().__init__(*args, **kwargs) 
         self.handler = handler
         self.title("Set up the database:")
         self.resizable(width=False, height=False)
@@ -53,6 +53,4 @@ class DBConnectWindow(ctk.CTk):
         }
         
         self.handler.createConnection(config)
-        print(config)
-    def mainloop(self, *args, **kwargs):
-        return super().mainloop(*args, **kwargs)
+        self.destroy()

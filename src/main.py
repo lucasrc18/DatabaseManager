@@ -10,8 +10,10 @@ class Main:
     def __init__(self):
         self.connection = None
         
-        self.window = DBConnectWindow(self)
-        self.window.mainloop()
+        self.home = DBViewWindow(cnx="", db="Teste")
+        self.connectionScreen = DBConnectWindow(master=self.home, handler=self)
+        
+        self.home.mainloop()
 
     def createConnection(self, config: dict):
         try: 
@@ -35,8 +37,5 @@ class Main:
             cur.execute(f'USE {db}')
             
             self.window = DBViewWindow(cnx=self.connection, db=db)
-            self.window.mainloop() 
-            self.window.event_info()
-        
 
 app = Main()
